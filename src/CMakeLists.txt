@@ -4,7 +4,7 @@
 
 include(FindPkgConfig)
 
-pkg_check_modules (V4L2 REQUIRED libv4l2)
+#pkg_check_modules (DRM REQUIRED libdrm)
 
 ################################################################################
 # Includes
@@ -12,23 +12,31 @@ pkg_check_modules (V4L2 REQUIRED libv4l2)
 
 include_directories(
 	.
-	include_directories(${V4L2_INCLUDE_DIR})
+#	include_directories(${DRM_INCLUDE_DIRS})
 )
 
 ################################################################################
 # Sources
 ################################################################################
 
+#if(WITH_DRM OR WITH_WAYLAND)
+#	add_subdirectory(displayBackend)
+#endif()
+
+#if(WITH_INPUT)
+#	add_subdirectory(inputBackend)
+#endif()
+
 set(SOURCES
 	main.cpp
-	Backend.cpp
-	Camera.cpp
-	CameraHandler.cpp
-	CameraManager.cpp
-	CommandHandler.cpp
-	FrontendBuffer.cpp
-	V4L2ToXen.cpp
+        DummyBackend.cpp
 )
+
+if(WITH_MOCKBELIB)
+	list(APPEND SOURCES
+		MockBackend.cpp
+	)
+endif()
 
 ################################################################################
 # Targets
@@ -42,10 +50,17 @@ install(TARGETS ${PROJECT_NAME} RUNTIME DESTINATION bin)
 # Libraries
 ################################################################################
 
+#add_dependencies(input display)
+#target_link_libraries(${PROJECT_NAME} display)
+
+
 set(XENBE_LIB xenbe)
+
+if(WITH_MOCKBELIB)
+	set(XENBE_LIB xenbemock)
+endif()
 
 target_link_libraries(${PROJECT_NAME}
 	${XENBE_LIB}
-	${V4L2_LIBRARY}
 	pthread
 )

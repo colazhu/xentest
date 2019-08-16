@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.0)
 
-set(PROJECT_NAME "dummybe")
+set(PROJECT_NAME "dummy_be")
 
 project(${PROJECT_NAME})
 
@@ -8,6 +8,7 @@ project(${PROJECT_NAME})
 # Options
 ################################################################################
 
+OPTION(WITH_MOCKBELIB "build with mock backend lib" OFF)
 OPTION(WITH_DOC "build with documenation" OFF)
 
 message(STATUS)
@@ -17,13 +18,22 @@ message(STATUS "CMAKE_INSTALL_PREFIX          = ${CMAKE_INSTALL_PREFIX}")
 message(STATUS)
 message(STATUS "WITH_DOC                      = ${WITH_DOC}")
 message(STATUS)
+message(STATUS "WITH_MOCKBELIB                = ${WITH_MOCKBELIB}")
+message(STATUS)
 message(STATUS "XEN_INCLUDE_PATH              = ${XEN_INCLUDE_PATH}")
 message(STATUS "XENBE_INCLUDE_PATH            = ${XENBE_INCLUDE_PATH}")
 message(STATUS "IF_INCLUDE_PATH               = ${IF_INCLUDE_PATH}")
+if(WITH_MOCKBELIB)
+message(STATUS "XENBEMOCK_INCLUDE_PATH        = ${XENBEMOCK_INCLUDE_PATH}")
+endif()
 message(STATUS)
 message(STATUS "XEN_LIB_PATH                  = ${XEN_LIB_PATH}")
 message(STATUS "XENBE_LIB_PATH                = ${XENBE_LIB_PATH}")
+if(WITH_MOCKBELIB)
+message(STATUS "XENBEMOCK_LIB_PATH            = ${XENBEMOCK_LIB_PATH}")
+endif()
 message(STATUS)
+
 
 ################################################################################
 # Compiler flags
@@ -36,6 +46,10 @@ set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall")
 # Definitions
 ################################################################################
 
+if(WITH_MOCKBELIB)
+	add_definitions(-DWITH_MOCKBELIB)
+endif()
+
 ################################################################################
 # Includes
 ################################################################################
@@ -43,6 +57,7 @@ set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall")
 include_directories(
 	${XEN_INCLUDE_PATH}
 	${XENBE_INCLUDE_PATH}
+	${XENBEMOCK_INCLUDE_PATH}
 	${CMAKE_CURRENT_BINARY_DIR}
 	.
 )
@@ -54,6 +69,7 @@ include_directories(
 link_directories(
 	${XEN_LIB_PATH}
 	${XENBE_LIB_PATH}
+	${XENBEMOCK_LIB_PATH}
 )
 
 ################################################################################
@@ -97,7 +113,7 @@ else()
 		${CMAKE_CURRENT_BINARY_DIR}/doxygen.cfg
 		@ONLY
 	)
-
+	
 	add_custom_target(
 		doc ${DOXYGEN_EXECUTABLE} ${CMAKE_CURRENT_BINARY_DIR}/doxygen.cfg
 		WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
