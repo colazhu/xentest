@@ -21,12 +21,14 @@
 #ifndef DUMMYBACKEND_HPP_
 #define DUMMYBACKEND_HPP_
 
+#include <string>
 #include <xen/be/BackendBase.hpp>
 #include <xen/be/FrontendHandlerBase.hpp>
 #include <xen/be/RingBufferBase.hpp>
 #include <xen/be/Log.hpp>
-
-typedef void* DummyDevPtr;
+#include <xen/io/dummyif.h>
+#include "DummyRingBuffer.hpp"
+#include "DummyDev.hpp"
 
 /***************************************************************************//**
  * Dummy frontend handler.
@@ -44,24 +46,19 @@ public:
      */
     DummyFrontendHandler(DummyDevPtr dummydev,
                            const std::string& devName,
-                           domid_t beDomId, domid_t feDomId, uint16_t devId) :
-        FrontendHandlerBase("DummyFrontend", devName,
-                            beDomId, feDomId, devId),
-        mDummyDev(dummydev),
-        mLog("DummyFrontend") {}
+                           domid_t beDomId, domid_t feDomId, uint16_t devId);
 
 protected:
-
     /**
      * Is called on connected state when ring buffers binding is required.
      */
     void onBind() override;
 
 private:
-
     DummyDevPtr mDummyDev;
     XenBackend::Log mLog;
 
+    void createConnector(const std::string& conPath, int conIndex);
 //    void createConnector(const std::string& streamPath, int conIndex,
 //                         BuffersStoragePtr bufferStorage);
 };
@@ -74,16 +71,15 @@ class DummyBackend : public XenBackend::BackendBase
 {
 public:
     /**
-     * @param display       display
+     * @param dummydev      dummy device
      * @param deviceName    device name
      */
-    DummyBackend(DummyDevPtr display,
+    DummyBackend(DummyDevPtr dummydev,
                 const std::string& deviceName);
 
 protected:
-
     /**
-     * Is called when new display frontend appears.
+     * Is called when new dummy frontend appears.
      * @param domId domain id
      * @param devId device id
      */

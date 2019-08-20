@@ -12,7 +12,10 @@ include(FindPkgConfig)
 
 include_directories(
 	.
-#	include_directories(${DRM_INCLUDE_DIRS})
+        ./xenbe_include
+        ./xen_include
+        .//xen_include/xen/io
+        ./include
 )
 
 ################################################################################
@@ -30,6 +33,8 @@ include_directories(
 set(SOURCES
 	main.cpp
         DummyBackend.cpp
+        DummyRingBuffer.cpp
+        DummyDev.cpp
 )
 
 if(WITH_MOCKBELIB)

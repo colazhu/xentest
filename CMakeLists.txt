@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.0)
 
-set(PROJECT_NAME "dummy_be")
+set(PROJECT_NAME "dummybe")
 
 project(${PROJECT_NAME})
 

@@ -31,6 +31,7 @@
 #include <unistd.h>
 
 #include <xen/be/Log.hpp>
+#include <xen/be/Utils.hpp>
 
 //#ifdef WITH_DISPLAY
 //#include "DisplayBackend.hpp"
@@ -156,7 +157,7 @@ bool commandLineOptions(int argc, char *argv[])
 
 		case 'd':
 
-			gDrmDevice = optarg;
+//			gDrmDevice = optarg;
 
 			break;
 
@@ -222,8 +223,8 @@ int main(int argc, char *argv[])
 
 		if (commandLineOptions(argc, argv))
 		{
-			LOG("Main", INFO) << "backend version:  " << VERSION;
-			LOG("Main", INFO) << "libxenbe version: " << Utils::getVersion();
+//            LOG("Main", INFO) << "backend version:  " << VERSION;
+//            LOG("Main", INFO) << "libxenbe version: " << Utils::getVersion();
 
 			ofstream logFile;
 
