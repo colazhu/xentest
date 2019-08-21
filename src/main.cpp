@@ -17,41 +17,25 @@
  *
  * Copyright (C) 2016 EPAM Systems Inc.
  */
-
+#include <linux/kernel.h>
+#include <linux/string.h>
 #include <algorithm>
 #include <atomic>
 #include <exception>
 #include <fstream>
 #include <iostream>
 #include <thread>
-
 #include <csignal>
 #include <execinfo.h>
 #include <getopt.h>
 #include <unistd.h>
-
+#include "Version.hpp"
 #include <xen/be/Log.hpp>
 #include <xen/be/Utils.hpp>
-
-//#ifdef WITH_DISPLAY
-//#include "DisplayBackend.hpp"
-//#ifdef WITH_DRM
-//#include "drm/Display.hpp"
-//#endif //WITH_DRM
-//#ifdef WITH_WAYLAND
-//#include "wayland/Display.hpp"
-//#endif //WITH_WAYLAND
-//#endif //WITH_DISPLAY
-
-//#ifdef WITH_INPUT
-//#include "InputBackend.hpp"
-//#endif
-
 #ifdef WITH_MOCKBELIB
 #include "MockBackend.hpp"
 #endif
-
-#include "Version.hpp"
+#include "DummyBackend.hpp"
 
 using std::cout;
 using std::dynamic_pointer_cast;
@@ -62,18 +46,9 @@ using std::this_thread::sleep_for;
 using std::toupper;
 using std::transform;
 using std::vector;
-
 using XenBackend::Log;
 using XenBackend::Utils;
 
-//enum class DisplayMode
-//{
-//	WAYLAND,
-//	DRM
-//};
-
-//DisplayMode gDisplayMode = DisplayMode::WAYLAND;
-//string gDrmDevice = "/dev/dri/card0";
 string gLogFileName;
 
 int gRetStatus = EXIT_SUCCESS;
@@ -191,30 +166,6 @@ bool commandLineOptions(int argc, char *argv[])
 	return true;
 }
 
-//#ifdef WITH_DISPLAY
-//DisplayItf::DisplayPtr getDisplay(DisplayMode mode)
-//{
-//	if (mode == DisplayMode::DRM)
-//	{
-//#ifdef WITH_DRM
-//		// DRM
-//		return Drm::DisplayPtr(new Drm::Display(gDrmDevice));
-//#else
-//		throw DisplayItf::Exception("DRM mode is not supported", EINVAL);
-//#endif
-//	}
-//	else
-//	{
-//#ifdef WITH_WAYLAND
-//		// Wayland
-//		return Wayland::DisplayPtr(new Wayland::Display());
-//#else
-//		throw DisplayItf::Exception("WAYLAND mode is not supported", EINVAL);
-//#endif
-//	}
-//}
-//#endif
-
 int main(int argc, char *argv[])
 {
 	try
@@ -223,8 +174,8 @@ int main(int argc, char *argv[])
 
 		if (commandLineOptions(argc, argv))
 		{
-//            LOG("Main", INFO) << "backend version:  " << VERSION;
-//            LOG("Main", INFO) << "libxenbe version: " << Utils::getVersion();
+            LOG("Main", INFO) << "backend version:  " << VERSION;
+            LOG("Main", INFO) << "libxenbe version: " << Utils::getVersion();
 
 			ofstream logFile;
 
@@ -237,42 +188,29 @@ int main(int argc, char *argv[])
 #ifdef WITH_MOCKBELIB
 			MockBackend mockBackend(0, 1);
 #endif
+#define KERN_INFO
+            printf(KERN_INFO "\n dummy main +++\n");
+            DummyDevPtr devprt(new DummyDev());
+            DummyBackend dummybackend(devprt, "DummyDevName");
 
-//#ifdef WITH_DISPLAY
-//			auto display = getDisplay(gDisplayMode);
+            printf(KERN_INFO " dummybackend start +++\n");
+            dummybackend.start();
+            printf(KERN_INFO " dummybackend start ---\n");
 
-//			DisplayBackend displayBackend(display, XENDISPL_DRIVER_NAME);
-
-//			displayBackend.start();
-//#endif
-
-//#ifdef WITH_INPUT
-//#ifdef WITH_WAYLAND
-//			InputBackend inputBackend(XENKBD_DRIVER_NAME,
-//					dynamic_pointer_cast<Wayland::Display>(display));
-//#else
-//			InputBackend inputBackend(XENKBD_DRIVER_NAME);
-//#endif
-//			inputBackend.start();
-//#endif
 			waitSignals();
 
-//#ifdef WITH_DISPLAY
-//			displayBackend.stop();
-//#endif
-
-//#ifdef WITH_INPUT
-//			inputBackend.stop();
-//#endif
+            printf(KERN_INFO " dummybackend stop +++\n");
+            dummybackend.stop();
+            printf(KERN_INFO " dummybackend stop ---\n");
 			logFile.close();
+
+            printf(KERN_INFO " dummy main ---\n");
 		}
 		else
 		{
 			cout << "Usage: " << argv[0]
 				 << " [-l <file>] [-v <level>]"
 				 << endl;
-			cout << "\t-m -- mode: DRM or WAYLAND" << endl;
-			cout << "\t-d -- DRM device" << endl;
 			cout << "\t-l -- log file" << endl;
 			cout << "\t-v -- verbose level in format: "
 				 << "<module>:<level>;<module:<level>" << endl;
@@ -293,3 +231,4 @@ int main(int argc, char *argv[])
 
 	return gRetStatus;
 }
+
